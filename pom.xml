@@ -3,10 +3,10 @@
 
     <!-- Rewrite it according to your plugin. -->
     <groupId>io.personium</groupId>
-    <artifactId>personium-plugin-sample</artifactId>
+    <artifactId>personium-plugin-keycloak-oidc</artifactId>
 
     <packaging>jar</packaging>
-    <version>1.0.1</version>
+    <version>1.0.0</version>
     <licenses>
         <license>
             <name>The Apache Software License, Version 2.0</name>
@@ -18,8 +18,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Rewrite it according to your plugin. -->
-        <final.name>personium-plugin-sample</final.name>
-        <plugin.class>io.personium.plugin.auth.sample.SampleAuthPlugin</plugin.class>
+        <final.name>personium-plugin-keycloak-oidc</final.name>
+        <plugin.class>io.personium.plugin.auth.oidc.KeyCloakOIDCAuthPlugin</plugin.class>
+        <slf4j.version>1.7.25</slf4j.version>
 
         <java.version>1.8</java.version>
         <java.source.version>1.8</java.source.version>
@@ -31,15 +32,76 @@
             <artifactId>personium-plugin-base</artifactId>
             <version>1.0.6</version>
         </dependency>
+        <dependency>
+            <groupId>io.personium</groupId>
+            <artifactId>personium-client-java</artifactId>
+            <version>1.4.14-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.12</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>1.15.2</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-api</artifactId>
+            <version>0.11.2</version>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-impl</artifactId>
+            <version>0.11.2</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jsonwebtoken</groupId>
+            <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson if Gson is preferred -->
+            <version>0.11.2</version>
+            <scope>runtime</scope>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>
+            <id>central</id>
+            <url>http://repo1.maven.org/maven2/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <repository>
             <id>personium.io</id>
-            <name>Personium Repository</name>
-            <url>http://personium.io/mvnrepo</url>
+            <name>personium.io</name>
+            <url>https://personium.io/mvnrepo</url>
         </repository>
     </repositories>
+
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <filtering>true</filtering>
+            </testResource>
+        </testResources>
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
