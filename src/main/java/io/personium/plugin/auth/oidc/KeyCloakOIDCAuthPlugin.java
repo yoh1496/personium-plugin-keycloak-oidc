@@ -31,9 +31,9 @@ import io.personium.plugin.base.PluginConfig;
 import io.personium.plugin.base.auth.AuthenticatedIdentity;
 
 /**
- * Test implementation of GenericOIDCAuthPlugin
+ * Test implementation of KeyCloakOIDCAuthPlugin
  */
-public class KeyCloakOIDCAuthPlugin extends GenericOIDCAuthPlugin {
+public class KeyCloakOIDCAuthPlugin extends OIDCAuthPluginBase {
 
     /** HostURL used when no URL is specified */
     static final String DEFAULT_HOST_URL;

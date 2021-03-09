@@ -52,7 +52,7 @@ import io.personium.test.categories.Unit;
  * Unit test for OidcPluginExceptionTest
  */
 @Category({Unit.class})
-public class KeyCloakOIDCAuthPluginTest {
+public class GenericOIDCAuthPluginTest {
 
 
     @ClassRule
@@ -76,18 +76,19 @@ public class KeyCloakOIDCAuthPluginTest {
      * Test with keycloak
      */
     @Test
-    @Ignore
+    // @Ignore
     public void testingWithKeyCloak() {
         String address = kcContainer.getHost();
-        Integer port = kcContainer.getFirstMappedPort();
+        Integer port = kcContainer.getMappedPort(8080);
 
         String kcOrigin = "http://" + address + ":" + port + "/";
 
-        KeyCloakOIDCAuthPlugin plugin = new KeyCloakOIDCAuthPlugin(
-            kcOrigin , "test"
+        GenericOIDCAuthPlugin plugin = new GenericOIDCAuthPlugin(
+            kcOrigin + "auth/realms/test",
+            kcOrigin + "auth/realms/test/.well-known/openid-configuration"
         );
-        Map<String, List<String>> body = new HashMap<String, List<String>>();
 
+        Map<String, List<String>> body = new HashMap<String, List<String>>();
         try {
             plugin.authenticate(body);
             fail("AuthPluginException is not called");
