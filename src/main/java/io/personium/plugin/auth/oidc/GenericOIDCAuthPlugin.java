@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import io.jsonwebtoken.Claims;
 import io.personium.plugin.base.PluginConfig;
+import io.personium.plugin.base.auth.AuthPluginException;
 import io.personium.plugin.base.auth.AuthenticatedIdentity;
 
 /**
@@ -42,9 +43,6 @@ public class GenericOIDCAuthPlugin extends OIDCAuthPluginBase {
 
     /** Prefix of property */
     static final String PREFIX_CONFIG_PROPERTY="io.personium.plugin.oidc.generic.";
-
-    /** Issuer URL */
-    static final String ISSUER_URL;
 
     /** OpenID Connect Configuration Endpoint URL */
     static final String CONFIGURATION_ENDPOINT;
@@ -86,7 +84,6 @@ public class GenericOIDCAuthPlugin extends OIDCAuthPluginBase {
             log.warn("Cannot load plugin config", e);
         }
 
-        ISSUER_URL = configProps.getProperty(PREFIX_CONFIG_PROPERTY + "issuerURL");
         CONFIGURATION_ENDPOINT = configProps.getProperty(PREFIX_CONFIG_PROPERTY + "configURL");
         String trustedClientIds = configProps.getProperty(PREFIX_CONFIG_PROPERTY + "trustedClientIds");
         TRUSTED_CLIENT_IDS = Arrays.asList(trustedClientIds.split(" "));
@@ -100,8 +97,8 @@ public class GenericOIDCAuthPlugin extends OIDCAuthPluginBase {
     /**
      * Constructor of GenericOIDCAuthPlugin
      */
-    public GenericOIDCAuthPlugin() {
-        super(ISSUER_URL, CONFIGURATION_ENDPOINT);
+    public GenericOIDCAuthPlugin() throws AuthPluginException {
+        super(CONFIGURATION_ENDPOINT);
     }
 
     /**
@@ -109,8 +106,8 @@ public class GenericOIDCAuthPlugin extends OIDCAuthPluginBase {
      * @param issuerURL URL of issuer
      * @param configurationEndpoint URL of configurationEndpoint
      */
-    public GenericOIDCAuthPlugin(String issuerURL, String configurationEndpoint) {
-        super(issuerURL, configurationEndpoint);
+    public GenericOIDCAuthPlugin(String configurationEndpoint) throws AuthPluginException {
+        super(configurationEndpoint);
     }
 
     /**

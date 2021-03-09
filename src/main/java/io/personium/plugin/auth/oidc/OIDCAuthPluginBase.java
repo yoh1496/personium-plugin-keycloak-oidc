@@ -45,20 +45,18 @@ public abstract class OIDCAuthPluginBase implements AuthPlugin {
     /** id token */
     public static final String KEY_TOKEN = "id_token";
 
-    /** Issuer the id_token must contain */
-    private String OIDCIssuer = null;
-
     /** URL of well-known openid-configuration for IdP */
     private String OIDCEndpointURL = null;
 
+    private OIDCConfiguration configuration = null;
+
     /**
      * Constructor of OIDCAuthPlugin
-     * @param OIDCIssuer Issuer the id_token must contain
      * @param OIDCEndpointURL URL of well-known openid-configuration for IdP
      */
-    protected OIDCAuthPluginBase(String OIDCIssuer, String OIDCEndpointURL) {
-        this.OIDCIssuer = OIDCIssuer;
+    protected OIDCAuthPluginBase(String OIDCEndpointURL) throws AuthPluginException {
         this.OIDCEndpointURL = OIDCEndpointURL;
+        this.configuration = new OIDCConfiguration(OIDCEndpointURL);
     }
 
     /**
@@ -112,8 +110,7 @@ public abstract class OIDCAuthPluginBase implements AuthPlugin {
             throw OidcPluginException.REQUIRED_PARAM_MISSING.create(KEY_TOKEN);
         }
 
-        Jwks jwks = new Jwks(this.OIDCEndpointURL);
-        JwksResolver jwksResolver = new JwksResolver(jwks);
+        JwksResolver jwksResolver = configuration.getResolver();
         Jws<Claims> jws = null;
 
         try {
@@ -136,7 +133,7 @@ public abstract class OIDCAuthPluginBase implements AuthPlugin {
         // Does the token contain specified issuer
         Claims claims = jws.getBody();
         String issuer = claims.getIssuer();
-        if (!issuer.equals(this.OIDCIssuer)) {
+        if (!issuer.equals(configuration.getIssuer())) {
             PluginLog.OIDC.INVALID_ISSUER.params(issuer).writeLog();
             throw OidcPluginException.AUTHN_FAILED.create();
         }

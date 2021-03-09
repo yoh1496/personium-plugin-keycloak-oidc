@@ -28,6 +28,7 @@ import java.util.Properties;
 
 import io.jsonwebtoken.Claims;
 import io.personium.plugin.base.PluginConfig;
+import io.personium.plugin.base.auth.AuthPluginException;
 import io.personium.plugin.base.auth.AuthenticatedIdentity;
 
 /**
@@ -111,7 +112,7 @@ public class KeyCloakOIDCAuthPlugin extends OIDCAuthPluginBase {
     /**
      * Constructor of KeyCloakOIDCAuthPlugin
      */
-    public KeyCloakOIDCAuthPlugin() {
+    public KeyCloakOIDCAuthPlugin() throws AuthPluginException {
         this(DEFAULT_HOST_URL, DEFAULT_REALM_NAME);
     }
 
@@ -120,10 +121,7 @@ public class KeyCloakOIDCAuthPlugin extends OIDCAuthPluginBase {
      * @param hostURL URL of keycloak host (ex: http://kc.example.com:8080/)
      * @param realm name of realm
      */
-    public KeyCloakOIDCAuthPlugin(String hostURL, String realm) {
-        super(
-            hostURL + "auth/realms/" + realm,
-            hostURL + "auth/realms/" + realm + "/.well-known/openid-configuration"
-            );
+    public KeyCloakOIDCAuthPlugin(String hostURL, String realm) throws AuthPluginException {
+        super(hostURL + "auth/realms/" + realm + "/.well-known/openid-configuration");
     }
 }

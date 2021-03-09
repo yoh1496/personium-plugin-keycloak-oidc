@@ -83,70 +83,74 @@ public class KeyCloakOIDCAuthPluginTest {
 
         String kcOrigin = "http://" + address + ":" + port + "/";
 
-        KeyCloakOIDCAuthPlugin plugin = new KeyCloakOIDCAuthPlugin(
-            kcOrigin , "test"
-        );
-        Map<String, List<String>> body = new HashMap<String, List<String>>();
-
         try {
-            plugin.authenticate(body);
-            fail("AuthPluginException is not called");
-        } catch(Exception e) {
-            assertEquals("Required parameter [id_token] missing.", e.getMessage());
-        }
-
-        // get id_token
-        HttpPost post = new HttpPost(kcOrigin + "auth/realms/test/protocol/openid-connect/token");
-        ArrayList<NameValuePair> params = new ArrayList<>();
-        params.add(new BasicNameValuePair("grant_type", "password"));
-        params.add(new BasicNameValuePair("client_id", "oidctestclient"));
-        params.add(new BasicNameValuePair("client_secret", "6cbd79e9-c387-4c72-9a1e-319441d44a81"));
-        params.add(new BasicNameValuePair("username", "testuser"));
-        params.add(new BasicNameValuePair("password", "passw0rd"));
-        params.add(new BasicNameValuePair("response_type", "id_token"));
-        params.add(new BasicNameValuePair("scope", "openid"));
-        try {
-            post.setEntity(new UrlEncodedFormEntity(params));
-        } catch(Exception e) {
-            fail(e.getMessage());
-        }
-
-        HttpResponse res = null;
-        CloseableHttpClient httpClient = null;
-        JSONObject jsonObj = null;
-        try {
-            if (ProxyUtils.isProxyHost()) {
-                httpClient = ProxyUtils.proxyHttpClient();
-                post.setConfig(ProxyUtils.getRequestConfig());
-            } else {
-                httpClient = CachingHttpClientBuilder.create().build();
-            }
-            res = httpClient.execute(post);
+            KeyCloakOIDCAuthPlugin plugin = new KeyCloakOIDCAuthPlugin(
+                kcOrigin , "test"
+            );
+            Map<String, List<String>> body = new HashMap<String, List<String>>();
     
-            // try (InputStream is = res.getEntity().getContent()) {
-            String bodyStr = EntityUtils.toString(res.getEntity(), "utf-8");
-            System.out.println(bodyStr);
-            jsonObj = (JSONObject) new JSONParser().parse(bodyStr);
-        } catch(Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
-        } finally {
             try {
-                httpClient.close();
+                plugin.authenticate(body);
+                fail("AuthPluginException is not called");
+            } catch(Exception e) {
+                assertEquals("Required parameter [id_token] missing.", e.getMessage());
+            }
+    
+            // get id_token
+            HttpPost post = new HttpPost(kcOrigin + "auth/realms/test/protocol/openid-connect/token");
+            ArrayList<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair("grant_type", "password"));
+            params.add(new BasicNameValuePair("client_id", "oidctestclient"));
+            params.add(new BasicNameValuePair("client_secret", "6cbd79e9-c387-4c72-9a1e-319441d44a81"));
+            params.add(new BasicNameValuePair("username", "testuser"));
+            params.add(new BasicNameValuePair("password", "passw0rd"));
+            params.add(new BasicNameValuePair("response_type", "id_token"));
+            params.add(new BasicNameValuePair("scope", "openid"));
+            try {
+                post.setEntity(new UrlEncodedFormEntity(params));
+            } catch(Exception e) {
+                fail(e.getMessage());
+            }
+    
+            HttpResponse res = null;
+            CloseableHttpClient httpClient = null;
+            JSONObject jsonObj = null;
+            try {
+                if (ProxyUtils.isProxyHost()) {
+                    httpClient = ProxyUtils.proxyHttpClient();
+                    post.setConfig(ProxyUtils.getRequestConfig());
+                } else {
+                    httpClient = CachingHttpClientBuilder.create().build();
+                }
+                res = httpClient.execute(post);
+        
+                // try (InputStream is = res.getEntity().getContent()) {
+                String bodyStr = EntityUtils.toString(res.getEntity(), "utf-8");
+                System.out.println(bodyStr);
+                jsonObj = (JSONObject) new JSONParser().parse(bodyStr);
             } catch(Exception e) {
                 e.printStackTrace();
                 fail(e.getMessage());
+            } finally {
+                try {
+                    httpClient.close();
+                } catch(Exception e) {
+                    e.printStackTrace();
+                    fail(e.getMessage());
+                }
             }
-        }
-
-        body.put("id_token", Arrays.asList(new String[] {(String)jsonObj.get("id_token")}));
-
-        try {
-            AuthenticatedIdentity ai = plugin.authenticate(body);
-            assertEquals("testuser", ai.getAccountName());
-            assertEquals(plugin.getAccountType(), ai.getAccountType());
-        } catch (Exception e) {
-            e.printStackTrace();
+    
+            body.put("id_token", Arrays.asList(new String[] {(String)jsonObj.get("id_token")}));
+    
+            try {
+                AuthenticatedIdentity ai = plugin.authenticate(body);
+                assertEquals("testuser", ai.getAccountName());
+                assertEquals(plugin.getAccountType(), ai.getAccountType());
+            } catch (Exception e) {
+                e.printStackTrace();
+                fail(e.getMessage());
+            }
+        } catch(AuthPluginException e ) {
             fail(e.getMessage());
         }
     }
