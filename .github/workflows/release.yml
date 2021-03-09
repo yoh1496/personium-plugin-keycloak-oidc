@@ -36,6 +36,8 @@ jobs:
         release_name: Release ${{ github.ref }}
         draft: false
         prerelease: false
+    - name: Get Release version
+      run: echo "RELEASE_VERSION=${GITHUB_REF##*/}" >> $GITHUB_ENV
     - name: Upload Release Asset
       id: upload_release_asset
       uses: actions/upload-release-asset@v1.0.1
@@ -44,6 +46,6 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./target/release.zip
-        asset_name: personium-plugin-oidc-generic_${{ github.ref##*/ }}.zip
+        asset_name: personium-plugin-oidc-generic_${{ env.RELEASE_VERSION }}.zip
         asset_content_type: application/zip
   
