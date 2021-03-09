@@ -45,8 +45,6 @@ import io.personium.plugin.base.utils.PluginUtils;
  */
 public class Jwks {
 
-    /** Endpoint of openid configuration URL */
-    String OpenIdConfigurationEndpointURL = null;
 
     /** Array of keyinfo */
     JSONArray keyArray = null;
@@ -55,50 +53,8 @@ public class Jwks {
      * Constructor of Jwks
      * @param endpoint 
      */
-    public Jwks(final String endpoint) {
-        this.OpenIdConfigurationEndpointURL = endpoint;
-    }
-
-    /**
-     * Function for getting jwks_uri from remote (.well-known URL)
-     * @param endpoint
-     * @return jwks_uri
-     * @throws AuthPluginException
-     */
-    private String getJwksUri(final String endpoint) throws AuthPluginException {
-        try {
-            return (String)PluginUtils.getHttpJSON(endpoint).get("jwks_uri");
-        } catch(ClientProtocolException e) {
-            // exception with HTTP procotol
-            throw OidcPluginException.UNEXPECTED_RESPONSE.create(endpoint, "proper HTTP response");
-        } catch(IOException e) {
-            // cannot reach server
-            throw OidcPluginException.UNEXPECTED_RESPONSE.create(HttpGet.METHOD_NAME, endpoint, "");
-        } catch(ParseException e) {
-            // response is not JSON
-            throw OidcPluginException.UNEXPECTED_RESPONSE.create(endpoint, "JSON");
-        }
-    }
-
-    /**
-     * Function for getting jwks from remote (jsks_uri URL)
-     * @return jwks
-     * @throws AuthPluginException
-     */
-    private JSONArray getKeys() throws AuthPluginException {
-        String endpoint = getJwksUri(OpenIdConfigurationEndpointURL);
-        try {
-            return (JSONArray)PluginUtils.getHttpJSON(endpoint).get("keys");
-        } catch(ClientProtocolException e) {
-            // exception with HTTP procotol
-            throw OidcPluginException.UNEXPECTED_RESPONSE.create(endpoint, "proper HTTP response");
-        } catch(IOException e) {
-            // cannot reach server
-            throw OidcPluginException.UNEXPECTED_RESPONSE.create(HttpGet.METHOD_NAME, endpoint, "");
-        } catch(ParseException e) {
-            // response is not JSON
-            throw OidcPluginException.UNEXPECTED_RESPONSE.create(endpoint, "JSON");
-        }
+    public Jwks(final JSONArray keyArray) {
+        this.keyArray = keyArray;
     }
 
     /**
@@ -108,7 +64,6 @@ public class Jwks {
      * @return public key
      */
     public Key getKey(String kid, String alg) throws AuthPluginException {
-        this.keyArray = getKeys();
         for (Object o : keyArray) {
             if (!(o instanceof JSONObject)) continue;
             JSONObject k = (JSONObject)o;

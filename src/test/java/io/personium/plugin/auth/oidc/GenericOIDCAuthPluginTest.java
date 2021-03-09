@@ -51,17 +51,16 @@ import io.personium.test.categories.Unit;
 /**
  * Unit test for OidcPluginExceptionTest
  */
-@Category({Unit.class})
-public class KeyCloakOIDCAuthPluginTest {
-
+@Category({ Unit.class })
+public class GenericOIDCAuthPluginTest {
 
     @ClassRule
     public static KeyCloakContainer kcContainer = new KeyCloakContainer(DockerImageName.parse("jboss/keycloak:12.0.2"))
-        .withExposedPorts(8080)
-        .withClasspathResourceMapping("keycloak_realm.json", "/tmp/keycloak_realm.json", BindMode.READ_ONLY)
-        // .withEnv("KEYCLOAK_USER", "admin")
-        // .withEnv("KEYCLOAK_PASSWORD", "password")
-        .withEnv("KEYCLOAK_IMPORT", "/tmp/keycloak_realm.json");
+            .withExposedPorts(8080)
+            .withClasspathResourceMapping("keycloak_realm.json", "/tmp/keycloak_realm.json", BindMode.READ_ONLY)
+            // .withEnv("KEYCLOAK_USER", "admin")
+            // .withEnv("KEYCLOAK_PASSWORD", "password")
+            .withEnv("KEYCLOAK_IMPORT", "/tmp/keycloak_realm.json");
 
     /**
      * Testing whether you can create specified type of exception
@@ -76,26 +75,25 @@ public class KeyCloakOIDCAuthPluginTest {
      * Test with keycloak
      */
     @Test
-    @Ignore
+    // @Ignore
     public void testingWithKeyCloak() {
         String address = kcContainer.getHost();
-        Integer port = kcContainer.getFirstMappedPort();
+        Integer port = kcContainer.getMappedPort(8080);
 
         String kcOrigin = "http://" + address + ":" + port + "/";
 
         try {
-            KeyCloakOIDCAuthPlugin plugin = new KeyCloakOIDCAuthPlugin(
-                kcOrigin , "test"
-            );
+            GenericOIDCAuthPlugin plugin = new GenericOIDCAuthPlugin(
+                    kcOrigin + "auth/realms/test/.well-known/openid-configuration");
+
             Map<String, List<String>> body = new HashMap<String, List<String>>();
-    
             try {
                 plugin.authenticate(body);
                 fail("AuthPluginException is not called");
-            } catch(Exception e) {
+            } catch (Exception e) {
                 assertEquals("Required parameter [id_token] missing.", e.getMessage());
             }
-    
+
             // get id_token
             HttpPost post = new HttpPost(kcOrigin + "auth/realms/test/protocol/openid-connect/token");
             ArrayList<NameValuePair> params = new ArrayList<>();
@@ -108,10 +106,10 @@ public class KeyCloakOIDCAuthPluginTest {
             params.add(new BasicNameValuePair("scope", "openid"));
             try {
                 post.setEntity(new UrlEncodedFormEntity(params));
-            } catch(Exception e) {
+            } catch (Exception e) {
                 fail(e.getMessage());
             }
-    
+
             HttpResponse res = null;
             CloseableHttpClient httpClient = null;
             JSONObject jsonObj = null;
@@ -123,25 +121,25 @@ public class KeyCloakOIDCAuthPluginTest {
                     httpClient = CachingHttpClientBuilder.create().build();
                 }
                 res = httpClient.execute(post);
-        
+
                 // try (InputStream is = res.getEntity().getContent()) {
                 String bodyStr = EntityUtils.toString(res.getEntity(), "utf-8");
                 System.out.println(bodyStr);
                 jsonObj = (JSONObject) new JSONParser().parse(bodyStr);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 fail(e.getMessage());
             } finally {
                 try {
                     httpClient.close();
-                } catch(Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                     fail(e.getMessage());
                 }
             }
-    
-            body.put("id_token", Arrays.asList(new String[] {(String)jsonObj.get("id_token")}));
-    
+
+            body.put("id_token", Arrays.asList(new String[] { (String) jsonObj.get("id_token") }));
+
             try {
                 AuthenticatedIdentity ai = plugin.authenticate(body);
                 assertEquals("testuser", ai.getAccountName());
@@ -150,9 +148,10 @@ public class KeyCloakOIDCAuthPluginTest {
                 e.printStackTrace();
                 fail(e.getMessage());
             }
-        } catch(AuthPluginException e ) {
+        } catch (AuthPluginException e) {
             fail(e.getMessage());
         }
+
     }
 
     /**
@@ -161,7 +160,7 @@ public class KeyCloakOIDCAuthPluginTest {
     @Test
     @Ignore
     public void testingIsProviderClientIdTrusted() {
-        assert(OIDC.isProviderClientIdTrusted("keycloak", "dummy-client2"));
+        assert (OIDC.isProviderClientIdTrusted("keycloak", "dummy-client2"));
     }
 
 }

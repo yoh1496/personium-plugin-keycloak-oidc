@@ -23,6 +23,7 @@ jobs:
       run: mvn -B package --file pom.xml
     - name: Zip output
       run: |
+        cp personium-plugin-oidc-generic.example.properties target/
         cd target
         zip release personium-plugin-oidc-generic.*
     - name: Create release

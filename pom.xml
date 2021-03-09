@@ -18,8 +18,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Rewrite it according to your plugin. -->
-        <final.name>personium-plugin-keycloak-oidc</final.name>
-        <plugin.class>io.personium.plugin.auth.oidc.KeyCloakOIDCAuthPlugin</plugin.class>
+        <final.name>personium-plugin-oidc-generic</final.name>
+        <plugin.class>io.personium.plugin.auth.oidc.GenericOIDCAuthPlugin</plugin.class>
         <slf4j.version>1.7.25</slf4j.version>
 
         <java.version>1.8</java.version>
