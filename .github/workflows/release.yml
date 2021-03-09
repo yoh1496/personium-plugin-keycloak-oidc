@@ -42,8 +42,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ secrets.create_release.outputs.upload_url }}
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./target/release.zip
-        asset_name: personium-plugin-oidc-generic-${{ github.ref }}.zip
+        asset_name: personium-plugin-oidc-generic_${{ github.ref##*/ }}.zip
         asset_content_type: application/zip
   
