@@ -105,7 +105,8 @@ public class KeyCloakOIDCAuthPlugin extends OIDCAuthPluginBase {
      * {@inheritDoc}
      */
     @Override
-    boolean isProviderClientIdTrusted(String audience) {
+    boolean isProviderClientIdTrusted(Claims claims) {
+        String audience = claims.getAudience();
         return (TRUSTED_CLIENT_IDS.contains("*") || TRUSTED_CLIENT_IDS.contains(audience));
     }
 

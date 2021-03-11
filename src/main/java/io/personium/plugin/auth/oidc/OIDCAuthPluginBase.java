@@ -87,7 +87,7 @@ public abstract class OIDCAuthPluginBase implements AuthPlugin {
      * @param audience
      * @return
      */
-    abstract boolean isProviderClientIdTrusted(String audience);
+    abstract boolean isProviderClientIdTrusted(Claims claims);
 
     /**
      * {@inheritDoc}
@@ -138,10 +138,8 @@ public abstract class OIDCAuthPluginBase implements AuthPlugin {
             throw OidcPluginException.AUTHN_FAILED.create();
         }
 
-        // Does the token contain channelId as aud
-        String audience = claims.getAudience();
-        if (!this.isProviderClientIdTrusted(audience)) {
-            throw OidcPluginException.WRONG_AUDIENCE.create(audience);
+        if (!this.isProviderClientIdTrusted(claims)) {
+            throw OidcPluginException.WRONG_AUDIENCE.create(claims.getAudience());
         }
 
         return this.parseClaimsToAuthenticatedIdentity(claims);
