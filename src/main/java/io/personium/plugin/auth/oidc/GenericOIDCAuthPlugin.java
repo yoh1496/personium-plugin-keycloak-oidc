@@ -16,12 +16,10 @@
  */
 package io.personium.plugin.auth.oidc;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -30,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.jsonwebtoken.Claims;
-import io.personium.plugin.base.PluginConfig;
+import io.jsonwebtoken.RequiredTypeException;
 import io.personium.plugin.base.auth.AuthPluginException;
 import io.personium.plugin.base.auth.AuthenticatedIdentity;
 
@@ -64,7 +62,7 @@ public class GenericOIDCAuthPlugin extends OIDCAuthPluginBase {
 
     static {
         Properties props = new Properties();
-        try(InputStream is = ClassLoader.getSystemResourceAsStream("default.properties")) {
+        try(InputStream is = GenericOIDCAuthPlugin.class.getClassLoader().getResourceAsStream("default.properties")) {
             if (is == null) {
                 log.warn("Plugin default.properties is not found");
             }
@@ -73,10 +71,9 @@ public class GenericOIDCAuthPlugin extends OIDCAuthPluginBase {
             log.warn("Cannot load plugin default.properties", e);
         }
 
-        Path pluginConfigPath = Paths.get(PluginConfig.getPluginPath(), (String)props.getProperty("config.filename"));
-
+        String pluginConfigPath = (String)props.getProperty("config.filename");
         Properties configProps = new Properties();
-        try(InputStream is = new FileInputStream(pluginConfigPath.toString())) {
+        try(InputStream is = GenericOIDCAuthPlugin.class.getClassLoader().getResourceAsStream(pluginConfigPath)) {
             configProps.load(is);
         } catch (FileNotFoundException e) {
             log.warn("Plugin config is not found in plugin directory: " + pluginConfigPath);
@@ -99,6 +96,7 @@ public class GenericOIDCAuthPlugin extends OIDCAuthPluginBase {
      */
     public GenericOIDCAuthPlugin() throws AuthPluginException {
         super(CONFIGURATION_ENDPOINT);
+        log.info(CUSTOM_PLUGIN_NAME + " Loaded (" + CUSTOM_GRANT_TYPE + ")");
     }
 
     /**
@@ -149,8 +147,26 @@ public class GenericOIDCAuthPlugin extends OIDCAuthPluginBase {
      * {@inheritDoc}
      */
     @Override
-    boolean isProviderClientIdTrusted(String audience) {
-        return (TRUSTED_CLIENT_IDS.contains("*") || TRUSTED_CLIENT_IDS.contains(audience));
+    @SuppressWarnings("unchecked")
+    boolean isProviderClientIdTrusted(Claims claims) {
+        if (TRUSTED_CLIENT_IDS.contains("*")) return true;
+
+        // Try to parse audience as ArrayList
+        List<String> audiencesList = new ArrayList<String>();
+        try {
+            ArrayList<String> auds = claims.get("aud", ArrayList.class);
+            audiencesList.addAll(auds);
+        } catch (RequiredTypeException e ) {
+            // get audience as String
+            String audience = claims.getAudience();
+            audiencesList.add(audience);
+        }
+
+        for (String client_id : TRUSTED_CLIENT_IDS) {
+            if (audiencesList.contains(client_id)) return true;
+        }
+
+        return false;
     }
 
 }
