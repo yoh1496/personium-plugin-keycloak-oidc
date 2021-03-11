@@ -73,7 +73,7 @@ public class GenericOIDCAuthPlugin extends OIDCAuthPluginBase {
 
         String pluginConfigPath = (String)props.getProperty("config.filename");
         Properties configProps = new Properties();
-        try(InputStream is = ClassLoader.getSystemResourceAsStream(pluginConfigPath)) {
+        try(InputStream is = GenericOIDCAuthPlugin.class.getClassLoader().getResourceAsStream(pluginConfigPath)) {
             configProps.load(is);
         } catch (FileNotFoundException e) {
             log.warn("Plugin config is not found in plugin directory: " + pluginConfigPath);
