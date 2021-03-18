@@ -91,7 +91,7 @@ public class Jwks {
                         if (!"P-256".equals(k.get("crv"))) {
                             throw new Exception(String.format("curve %s is not supported", (String)k.get("crv")));
                         }
-                        params.init(new ECGenParameterSpec("secp256k1"));
+                        params.init(new ECGenParameterSpec("secp256r1"));
                         BigInteger x = new BigInteger(1, PluginUtils.decodeBase64Url((String) k.get("x")));
                         BigInteger y = new BigInteger(1, PluginUtils.decodeBase64Url((String) k.get("y")));
                         ECPoint w = new ECPoint(x, y);
